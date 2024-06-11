@@ -1,8 +1,20 @@
 import React, { useEffect, useState } from "react";
+import Header from "./Header";
+
+const columnStyle = {
+  flex: 1,
+  display: "flex",
+  flexDirection: "column",
+  marginTop: "10px",
+  marginLeft: "10px",
+  gap: "12px",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
 const containerStyle = {
   display: "flex",
   alignItems: "flex-start",
-  // backgroundColor: "blue",
   color: "#333",
   padding: "20px",
   height: "80.9vh",
@@ -16,6 +28,9 @@ const imageContainerStyle = {
   justifyContent: "center",
   alignItems: "center",
   borderRadius: "5px",
+  // backgroundColor: "red",
+  marginLeft: "10px",
+  marginTop: "25px",
 };
 const imageStyle = {
   width: "100%",
@@ -23,51 +38,47 @@ const imageStyle = {
   borderRadius: "5px",
 };
 const dataContainerStyle = {
-  flex: 1,
   display: "flex",
-  flexDirection: "column",
-  marginTop: "10px",
-  marginLeft: "110px",
-  gap: "12px",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  width: "100%",
   height: "90%",
-  justifyContent: "center",
-  alignItems: "center",
+  // backgroundColor: "red",
+  marginLeft: "10px",
+  marginTop: "20px",
 };
+
 const cardStyle = {
-  backgroundColor: "#800080",
-  padding: "4px",
+  backgroundColor: "#00008B",
+  padding: "8px",
   borderRadius: "5px",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
   height: "30px",
   color: "#fff",
-  fontSize: "21px",
+  fontSize: "16px",
   width: "200px",
   transition: "background-color 0.3s ease",
 };
 const hoveredCardStyle = {
   backgroundColor: "red",
   color: "white",
-  pointer: "cursor",
+  cursor: "pointer",
 };
 const App = () => {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]);
   const [imageUrl, setImageUrl] = useState("");
-  const [hoveredCards, setHoveredCards] = useState([]); // Track hovered state for each card
+  const [hoveredCardIndex, setHoveredCardIndex] = useState(null); // Track hovered state for each card
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://1mh8wqhvf7.execute-api.eu-west-2.amazonaws.com/reservation"
+          "https://0ns1q7m4zj.execute-api.eu-west-2.amazonaws.com/de"
         );
         const data = await response.json();
-        console.log("seshu", data.body.Item);
-        let filtered = data.body.Item;
-        delete filtered["DEPARTMENT"];
-        console.log(filtered);
-        setData(data.body.Item);
-        console.log("seshu", data.body.Item);
+        console.log(data);
+        setData(data.body);
         setImageUrl(
           "https://wb-quicksight-html.s3.eu-west-2.amazonaws.com/Whitbread-image.jpg"
         ); // Replace with the actual URL
@@ -87,29 +98,35 @@ const App = () => {
       key={index}
       style={{
         ...cardStyle,
-        ...(hoveredCards[index] ? hoveredCardStyle : null),
+        ...(hoveredCardIndex === index ? hoveredCardStyle : null),
       }}
       onMouseEnter={() => handleMouseEnter(index)}
-      onMouseLeave={() => handleMouseLeave(index)}
+      onMouseLeave={() => handleMouseLeave()}
     >
       <span>{label}:</span>
       <span>{value}</span>
     </div>
   );
   const handleMouseEnter = (index) => {
-    setHoveredCards((prev) => {
-      const newHoveredCards = [...prev];
-      newHoveredCards[index] = true;
-      return newHoveredCards;
-    });
+    setHoveredCardIndex(index);
   };
-  const handleMouseLeave = (index) => {
-    setHoveredCards((prev) => {
-      const newHoveredCards = [...prev];
-      newHoveredCards[index] = false;
-      return newHoveredCards;
-    });
+  const handleMouseLeave = () => {
+    setHoveredCardIndex(null);
   };
+  const renderColumn = (items, department) => (
+    <div style={columnStyle}>
+      {items.map((item, index) =>
+        Object.keys(item.Item).map((key, subIndex) =>
+          renderCard(key, item.Item[key], `${department}-${index}-${subIndex}`)
+        )
+      )}
+    </div>
+  );
+  const queryItems = data.filter((item) => item.Item.DEPARTMENT === "Query");
+  const reservationItems = data.filter(
+    (item) => item.Item.DEPARTMENT === "Reservation"
+  );
+  const groupItems = data.filter((item) => item.Item.DEPARTMENT === "Group");
   return (
     <div style={containerStyle}>
       <div style={imageContainerStyle}>
@@ -119,32 +136,26 @@ const App = () => {
           <span>Upload Image</span>
         )}
       </div>
-      <div style={dataContainerStyle}>
-        {data &&
-          Object.keys(data).map((key, index) =>
-            renderCard(key, data[key], index)
-          )}
-      </div>
+      {data.length > 0 && (
+        <div style={dataContainerStyle}>
+          {renderColumn(queryItems, "Query")}
+          {renderColumn(reservationItems, "Reservation")}
+          {renderColumn(groupItems, "Group")}
+        </div>
+      )}
     </div>
   );
 };
 export default App;
-this is my Dashboard.js
 
-import React from "react";
-function ReservationCenterHeader() {
-  const footerStyle = {
-    color: "white",
-    // Dark blue color
-    backgroundColor: "#800080",
-    // Adjust font size as needed
-    padding: "10px",
-    height: "4.7vh",
-    display: "flex",
-    alignItems: "flex-start",
-    fontSize: "24px",
-  };
-  return <div style={footerStyle}></div>;
-}
-export default ReservationCenterHeader;
-this is my footer.js
+
+
+
+this is the api
+
+{"statusCode":200,"body":[[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Query"}],[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Reservation"}],[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Group"}]]}
+
+
+this is the json response from lambda.
+
+just modufy the map function according to it and also show the values , Department name first , ciq, lwt like that continue to ans_rate for all the three columns, do not change any styling or anything else 

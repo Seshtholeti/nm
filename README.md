@@ -44,7 +44,7 @@ const dataContainerStyle = {
   marginTop: "20px",
 };
 const cardStyle = {
-  backgroundColor: "#00008B",
+  backgroundColor: "#800080",
   padding: "8px",
   borderRadius: "5px",
   display: "flex",
@@ -52,8 +52,8 @@ const cardStyle = {
   alignItems: "center",
   height: "30px",
   color: "#fff",
-  fontSize: "16px",
-  width: "200px",
+  fontSize: "14px", // Adjusted font size
+  width: "220px", // Adjusted width
   transition: "background-color 0.3s ease",
 };
 const hoveredCardStyle = {
@@ -69,7 +69,7 @@ const App = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://3c7zirzusl.execute-api.eu-west-2.amazonaws.com/test"
+          "https://9lczoy9kqi.execute-api.eu-west-2.amazonaws.com/uk"
         );
         const responseData = await response.json();
         console.log(responseData);
@@ -136,11 +136,15 @@ const App = () => {
       </div>
     );
   };
-  const queryItems = data.filter((item) => item.DEPARTMENT === "Query");
   const reservationItems = data.filter(
-    (item) => item.DEPARTMENT === "Reservation"
+    (item) => item.DEPARTMENT === "Reservation center"
   );
-  const groupItems = data.filter((item) => item.DEPARTMENT === "Group");
+  const guestRelationsItems = data.filter(
+    (item) => item.DEPARTMENT === "Guest Relations"
+  );
+  const restaurantItems = data.filter(
+    (item) => item.DEPARTMENT === "Restaurant"
+  );
   return (
     <div style={containerStyle}>
       <div style={imageContainerStyle}>
@@ -152,9 +156,9 @@ const App = () => {
       </div>
       {data.length > 0 && (
         <div style={dataContainerStyle}>
-          {renderColumn(reservationItems, "Reservation")}
-          {renderColumn(queryItems, "Query")}
-          {renderColumn(groupItems, "Group")}
+          {renderColumn(reservationItems, "Reservation center")}
+          {renderColumn(guestRelationsItems, "Guest Relations")}
+          {renderColumn(restaurantItems, "Restaurant")}
         </div>
       )}
     </div>

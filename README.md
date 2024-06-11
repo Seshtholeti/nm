@@ -153,9 +153,11 @@ export default App;
 
 this is the api
 
+https://3c7zirzusl.execute-api.eu-west-2.amazonaws.com/test
+
 {"statusCode":200,"body":[[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Query"}],[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Reservation"}],[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Group"}]]}
 
 
-this is the json response from lambda.
+this is the json response from lambda above one.
 
 just modufy the map function according to it and also show the values , Department name first , ciq, lwt like that continue to ans_rate for all the three columns, do not change any styling or anything else 

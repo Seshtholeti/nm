@@ -3,29 +3,86 @@ import "./App.css";
 import Dashboard from "./Dashboard";
 import Header from "./Header";
 import Footer from "./Footer";
-import { MsalAuthenticationTemplate, useMsal } from "@azure/msal-react";
-import { InteractionType } from "@azure/msal-browser";
-import { loginRequest } from "./authConfig";
-const App = () => {
-  const { instance, accounts } = useMsal();
-  const handleLogin = () => {
-    instance.loginPopup(loginRequest).catch((e) => {
-      console.error(e);
-    });
-  };
-  const isAuthenticated = accounts.length > 0;
+function App() {
   return (
     <div className="App">
       <header>{/* <h1>QuickSight Dashboard</h1> */}</header>
       <main>
-        {isAuthenticated ? (
-          <Dashboard />
-        ) : (
-          <button onClick={handleLogin}>Login</button>
-        )}
+        <Header />
+        <Dashboard />
+        <Footer />
       </main>
-      {isAuthenticated && <Footer />}
+    </div>
+  );
+}
+export default App;
+
+this my refernce app.js
+
+import React, { useEffect, useState } from "react";
+import {
+  AuthenticatedTemplate,
+  UnauthenticatedTemplate,
+  useMsal,
+  MsalProvider,
+} from "@azure/msal-react";
+import { loginRequest } from "./authConfig";
+const WrappedView = () => {
+  const { instance, accounts } = useMsal(); // Get instance and accounts from useMsal hook
+  const [accessToken, setAccessToken] = useState(null);
+  useEffect(() => {
+    const account = accounts[0]; // Get the first account from the accounts array
+    if (account) {
+      instance
+        .acquireTokenSilent({
+          ...loginRequest,
+          account: account,
+        })
+        .then((response) => {
+          setAccessToken(response.accessToken);
+        })
+        .catch((error) => {
+          console.error("Error acquiring token silently:", error);
+        });
+    }
+  }, [instance, accounts]);
+  const handleLoginPopup = () => {
+    console.log("Initiating login popup...");
+    instance
+      .loginPopup(loginRequest)
+      .then((response) => {
+        console.log("Login successful. Access token:", response.accessToken);
+        setAccessToken(response.accessToken); // Update accessToken state
+      })
+      .catch((error) => {
+        console.error("Login Popup Error:", error);
+      });
+  };
+  return (
+    <div className="App">
+      <AuthenticatedTemplate>
+        {accessToken ? (
+          <p>Authenticated Successfully with Access Token: {accessToken}</p>
+        ) : (
+          <p>Loading...</p>
+        )}
+      </AuthenticatedTemplate>
+      <UnauthenticatedTemplate>
+        <button onClick={handleLoginPopup}>Sign in</button>
+      </UnauthenticatedTemplate>
     </div>
   );
 };
+const App = ({ instance }) => {
+  return (
+    <MsalProvider instance={instance}>
+      <WrappedView />
+    </MsalProvider>
+  );
+};
 export default App;
+
+this is my original app.js
+
+
+modify my original app.js with the refernce part after successful authenticated we need to show the header, dashboard, footer components

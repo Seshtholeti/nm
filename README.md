@@ -179,86 +179,8 @@ const App = () => {
 };
 export default App;
 
-this is dashboard.js
+this is the dashboard .js, the api response is not rendering when I see the hosted url.
 
-import React, { useEffect, useState } from "react";
-import "./App.css";
-import Dashboard from "./Dashboard";
-import Header from "./Header";
-import Footer from "./Footer";
-import {
-  AuthenticatedTemplate,
-  UnauthenticatedTemplate,
-  useMsal,
-  MsalProvider,
-} from "@azure/msal-react";
-import { loginRequest } from "./authConfig";
-const WrappedView = () => {
-  const { instance, accounts } = useMsal();
-  const [accessToken, setAccessToken] = useState(null);
-  useEffect(() => {
-    const account = accounts[0];
-    if (account) {
-      instance
-        .acquireTokenSilent({
-          ...loginRequest,
-          account: account,
-        })
-        .then((response) => {
-          setAccessToken(response.accessToken);
-        })
-        .catch((error) => {
-          console.error("Error acquiring token silently:", error);
-        });
-    }
-  }, [instance, accounts]);
-  const handleLoginPopup = () => {
-    instance
-      .loginPopup(loginRequest)
-      .then((response) => {
-        setAccessToken(response.accessToken);
-      })
-      .catch((error) => {
-        console.error("Login Popup Error:", error);
-      });
-  };
-  const handleLogout = () => {
-    instance.logoutPopup().catch((error) => {
-      console.error("Logout Error:", error);
-    });
-  };
-  return (
-    <div className="App">
-      <AuthenticatedTemplate>
-        {accessToken ? (
-          <div>
-            <Header onLogout={handleLogout} />
-            <Dashboard />
-            <Footer />
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
-      </AuthenticatedTemplate>
-      <UnauthenticatedTemplate>
-        <div className="welcome-container">
-          <h1>Welcome to the Wallboard</h1>
-          <p>Please click on the button below to sign in:</p>
-          <button className="sign-in-button" onClick={handleLoginPopup}>
-            Sign in
-          </button>
-        </div>
-      </UnauthenticatedTemplate>
-    </div>
-  );
-};
-const App = ({ instance }) => {
-  return (
-    <MsalProvider instance={instance}>
-      <WrappedView />
-    </MsalProvider>
-  );
-};
-export default App;
+below is the tha api response
 
-this is app.js
+{"statusCode":200,"body":[[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Queries"}],[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Reservation"}],[{"ANS_RATE":"0","OFFERED":0,"ANS":0,"RDY":0,"ONLINE":0,"NOT_RDY":0,"TALK":0,"LWT":"0:0","CIQ":0,"DEPARTMENT":"Group"}]]}

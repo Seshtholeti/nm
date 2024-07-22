@@ -1,25 +1,21 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
-
 Parameters:
   LambdaExecutionRole:
     Type: String
     Description: ARN of the IAM role for Lambda execution
-
 Resources:
-  # Connect Flow - voice to chat
   ConnectInstance:
     Type: AWS::Connect::Instance
     Properties:
       IdentityManagementType: CONNECT_MANAGED
       InstanceAlias: VoiceToChatInstance
-
   ConnectContactFlow:
     Type: AWS::Connect::ContactFlow
     Properties:
-      InstanceArn: !GetAtt ConnectInstance.Arn
+      InstanceArn: ConnectInstance.Arn
       Name: VoiceToChatFlow
-      Content: |
+      Content: >
         {
           "Version": "2019-10-30",
           "StartAction": "1ff34355-4c6a-42fb-8e71-627d4ffcde6a",
@@ -352,20 +348,16 @@ Resources:
           }
         }
       Description: Contact flow for voice to chat transfer
-
-  # S3 Bucket for storing files
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: voice-to-chat-files-bucket
-
-  # CloudFront Distribution
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
         Origins:
-          - DomainName: !GetAtt S3Bucket.DomainName
+          - DomainName: S3Bucket.DomainName
             Id: S3Origin
             S3OriginConfig: {}
         Enabled: true
@@ -377,67 +369,55 @@ Resources:
             QueryString: false
             Cookies:
               Forward: none
-
-  # Lambda Function for voice-to-chat transfer
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
-      Role: !Ref LambdaExecutionRole
+      Role: LambdaExecutionRole
       Code:
-        S3Bucket: !Ref S3Bucket
+        S3Bucket: S3Bucket
         S3Key: lambda/voice-to-chat-transfer.zip
       Runtime: nodejs14.x
       Timeout: 30
-
-  # Pinpoint Project
   PinpointProject:
     Type: AWS::Pinpoint::Project
     Properties:
       Name: VoiceToChatPinpoint
-
-  # Pinpoint SMS Channel
   PinpointSMSChannel:
     Type: AWS::Pinpoint::SMSChannel
     Properties:
-      ApplicationId: !Ref PinpointProject
+      ApplicationId: PinpointProject
       Enabled: true
       SenderId: VoiceToChat
-
-  # Pinpoint Email Channel
   PinpointEmailChannel:
     Type: AWS::Pinpoint::EmailChannel
     Properties:
-      ApplicationId: !Ref PinpointProject
+      ApplicationId: PinpointProject
       Enabled: true
       FromAddress: no-reply@voice-to-chat.com
-      Identity: !Ref EmailIdentityArn
-
+      Identity: EmailIdentityArn
 Outputs:
   ConnectInstanceId:
     Description: The ID of the Connect instance
-    Value: !Ref ConnectInstance
+    Value: ConnectInstance
   ConnectContactFlowArn:
     Description: The ARN of the Connect contact flow
-    Value: !Ref ConnectContactFlow
+    Value: ConnectContactFlow
   S3BucketName:
     Description: The name of the S3 bucket
-    Value: !Ref S3Bucket
+    Value: S3Bucket
   CloudFrontDistributionId:
     Description: The ID of the CloudFront distribution
-    Value: !Ref CloudFrontDistribution
+    Value: CloudFrontDistribution
   LambdaFunctionArn:
     Description: The ARN of the Lambda function
-    Value: !Ref LambdaFunction
+    Value: LambdaFunction
   PinpointProjectId:
     Description: The ID of the Pinpoint project
-    Value: !Ref PinpointProject
+    Value: PinpointProject
   PinpointSMSChannelId:
     Description: The ID of the Pinpoint SMS channel
-    Value: !Ref PinpointSMSChannel
+    Value: PinpointSMSChannel
   PinpointEmailChannelId:
     Description: The ID of the Pinpoint Email channel
-    Value: !Ref PinpointEmailChannel
-```
-
-In this CloudFormation template, the provided JSON for the Amazon Connect contact flow is embedded in the `AWS::Connect::ContactFlow` resource. This template includes all necessary components such as the S3 bucket, CloudFront distribution, Lambda function, Pinpoint project, SMS, and Email channels. Make sure to adjust resource properties as needed for your specific requirements.
+    Value: PinpointEmailChannel

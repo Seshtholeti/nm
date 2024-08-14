@@ -93,3 +93,145 @@
 .sign-in-button:hover {
   background-color: #005a9e;
 }
+this is my app.js
+
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+function Header({ onLogout }) {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [isHovered, setIsHovered] = useState(false);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const headerStyle = {
+    color: "white",
+    backgroundColor: "#820882",
+    padding: "10px",
+    height: "30px",
+    display: "flex",
+    alignItems: "center",
+    fontSize: "40px",
+    width: "100vw",
+    marginTop: "50px",
+    position: "fixed",
+    top: "-50px",
+    justifyContent: "space-between",
+    // position: "relative",
+    // bottom: "28px",
+  };
+  const headerTitle = {
+    paddingBottom: "5px",
+    marginLeft: "60px",
+  };
+  const formatDate = (date) => {
+    const options = { timeZone: "Europe/Berlin" };
+    const day = String(
+      date.toLocaleDateString("en-GB", options).split("/")[0]
+    ).padStart(2, "0");
+    const month = String(
+      date.toLocaleDateString("en-GB", options).split("/")[1]
+    ).padStart(2, "0");
+    const year = date.toLocaleDateString("en-GB", options).split("/")[2];
+    return `${day}.${month}.${year}`;
+  };
+  const formatTime = (date) => {
+    const options = {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Europe/Berlin",
+    };
+    return date.toLocaleTimeString("en-GB", options);
+  };
+  const iconContainerStyle = {
+    display: "flex",
+    alignItems: "center",
+    marginRight: "60px",
+  };
+  const iconStyle = {
+    marginLeft: "10px",
+    fontSize: "30px",
+    color: "white",
+    cursor: "pointer",
+  };
+  const iconHoverStyle = {
+    color: "#c9302c",
+  };
+  const logoutTextStyle = {
+    fontSize: "10px",
+    marginLeft: "15px",
+    visibility: isHovered ? "visible" : "hidden",
+  };
+  return (
+    <div style={headerStyle}>
+      <div style={headerTitle}>Anrufstatistik</div>
+      <div style={iconContainerStyle}>
+        <div>
+          {formatDate(currentTime)}&nbsp;&nbsp;{formatTime(currentTime)}
+        </div>
+        <div
+          style={logoutTextStyle}
+          onMouseOver={() => setIsHovered(true)}
+          onMouseOut={() => setIsHovered(false)}
+          onClick={onLogout}
+        >
+          Logout
+        </div>
+        <FontAwesomeIcon
+          icon={faSignOutAlt}
+          style={iconStyle}
+          onMouseOver={(e) => {
+            e.currentTarget.style.color = iconHoverStyle.color;
+            setIsHovered(true);
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.color = iconStyle.color;
+            setIsHovered(false);
+          }}
+          onClick={onLogout}
+        />
+      </div>
+    </div>
+  );
+}
+export default Header;
+this is my header.js
+
+import React from "react";
+import "./App.css";
+function ReservationCenterHeader({ avg }) {
+  console.log(avg);
+  const footerStyle = {
+    color: "white",
+    // Dark blue color
+    backgroundColor: "#820882",
+    // Adjust font size as needed
+    paddingLeft: "500px",
+    // height: "0.7vh",
+    width: "100vw",
+    display: "flex",
+    alignItems: "center",
+    fontSize: "38px",
+    // marginTop: "90px",
+    position: "fixed",
+    bottom: "-36px",
+    // textAlign: "centre",
+    fontWeight: "bold",
+    // top: "32px",
+  };
+
+  // const Marquee = ({ text }) => {
+  return (
+    <div className="marquee">
+      <p style={footerStyle}>Total Angenommen: {avg}</p>
+    </div>
+  );
+  // };
+}
+export default ReservationCenterHeader;
+this is my footer.js

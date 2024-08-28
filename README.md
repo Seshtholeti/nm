@@ -1,34 +1,3 @@
-2024-08-28 15:54:55 UTC+0530
-voice-to-chat-model
-ROLLBACK_IN_PROGRESS
--
-The following resource(s) failed to create: [PinpointApp, LambdaFunction, ConnectContactFlow, S3Bucket]. Rollback requested by user.
-2024-08-28 15:54:55 UTC+0530
-LambdaFunction
-CREATE_FAILED
--
-Resource handler returned message: "Function creation failed because the function already exists" (RequestToken: e3999b52-42ed-bc7d-0f1e-daa39861b200, HandlerErrorCode: AlreadyExists)
-2024-08-28 15:54:55 UTC+0530
-PinpointApp
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 15:54:54 UTC+0530
-S3Bucket
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 15:54:54 UTC+0530
-ConnectContactFlow
-CREATE_FAILED
--
-Resource handler returned message: "Invalid request (Service: Connect, Status Code: 400, Request ID: a17df186-8eed-444e-9d4e-cbfb27f349d4)" (RequestToken: 119053f9-0be5-59cf-4dd3-1d33e64be8fa, HandlerErrorCode: InvalidRequest)
-
-
-
-
-
-
 ```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
@@ -377,7 +346,7 @@ Resources:
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: Voice-to-chat-transfer
+      FunctionName: Voice-to-chat-transfer-unique  # Changed to a unique name
       Handler: index.handler
       Role: !Ref LambdaExecutionRole
       Code:

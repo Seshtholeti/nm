@@ -1,3 +1,25 @@
+
+	
+ROLLBACK_COMPLETE
+-
+-
+2024-08-28 13:53:43 UTC+0530
+voice-to-chat-model
+ROLLBACK_IN_PROGRESS
+-
+Validation failed for following resources: [ConnectInstance]. Rollback requested by user.
+2024-08-28 13:53:43 UTC+0530
+ConnectInstance
+CREATE_FAILED
+VALIDATION_FAILED
+Properties validation failed for resource ConnectInstance with message: [#/Attributes: extraneous key [ContactFlowLogs] is not permitted, #/Attributes/InboundCalls: expected type: Boolean, found: String, #/Attributes/OutboundCalls: expected type: Boolean, found: String, #/Attributes/ContactLens: expected type: Boolean, found: String, #/Attributes/AutoResolveBestVoices: expected type: Boolean, found: String]
+2024-08-28 13:53:40 UTC+0530
+voice-to-chat-model
+CREATE_IN_PROGRESS
+-
+User Initiated
+
+
 ```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution

@@ -1,3 +1,36 @@
+2024-08-28 16:08:16 UTC+0530
+voice-to-chat-model
+ROLLBACK_IN_PROGRESS
+-
+The following resource(s) failed to create: [PinpointApp, LambdaFunction, ConnectContactFlow, S3Bucket]. Rollback requested by user.
+2024-08-28 16:08:16 UTC+0530
+S3Bucket
+CREATE_FAILED
+-
+Resource creation cancelled
+2024-08-28 16:08:16 UTC+0530
+LambdaFunction
+CREATE_FAILED
+-
+Resource creation cancelled
+2024-08-28 16:08:16 UTC+0530
+PinpointApp
+CREATE_FAILED
+-
+Resource creation cancelled
+2024-08-28 16:08:16 UTC+0530
+LambdaFunction
+CREATE_IN_PROGRESS
+-
+Resource creation Initiated
+2024-08-28 16:08:16 UTC+0530
+ConnectContactFlow
+CREATE_FAILED
+-
+Resource handler returned message: "Invalid request (Service: Connect, Status Code: 400, Request ID: e7e8a750-b51c-489a-8db6-02cbe2145a07)" (RequestToken: 0519c7fe-1a75-9871-7323-1e69f20e823d, HandlerErrorCode: InvalidRequest)
+
+
+
 ```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution

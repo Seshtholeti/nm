@@ -1,31 +1,4 @@
-ROLLBACK_IN_PROGRESS
--
-The following resource(s) failed to create: [PinpointApp, LambdaFunction, S3Bucket, ConnectInstance]. Rollback requested by user.
-2024-08-28 12:55:41 UTC+0530
-PinpointApp
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 12:55:41 UTC+0530
-S3Bucket
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 12:55:41 UTC+0530
-LambdaFunction
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 12:55:41 UTC+0530
-ConnectInstance
-CREATE_FAILED
--
-Properties validation failed for resource ConnectInstance with message: #: required key [Attributes] not found
-
-
-
-above one is the error / reason for roll back and below is the template please modify it
-
+```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
 
@@ -43,6 +16,11 @@ Resources:
     Properties:
       IdentityManagementType: CONNECT_MANAGED
       InstanceAlias: VoiceToChatInstance
+      Attributes:  # Added required Attributes property
+        InboundCallsEnabled: true
+        OutboundCallsEnabled: true
+        ContactFlowLogsEnabled: true
+        ChatEnabled: true
 
   ConnectContactFlow:
     Type: AWS::Connect::ContactFlow
@@ -437,3 +415,5 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront distribution ID"
     Value: !Ref CloudFrontDistribution
+
+```

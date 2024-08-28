@@ -1,7 +1,11 @@
 ```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
+
 Parameters:
+  ConnectInstanceArn:
+    Type: String
+    Description: ARN of the existing Connect instance
   LambdaExecutionRole:
     Type: String
     Description: ARN of the IAM role for Lambda execution
@@ -10,21 +14,10 @@ Parameters:
     Description: ARN of the SES email identity for Pinpoint email channel
 
 Resources:
-  ConnectInstance:
-    Type: AWS::Connect::Instance
-    Properties:
-      IdentityManagementType: CONNECT_MANAGED
-      InstanceAlias: VoiceToChatInstance
-      Attributes:
-        AutoResolveBestVoices: true
-        InboundCalls: true
-        OutboundCalls: true
-        ContactLens: true
-
   ConnectContactFlow:
     Type: AWS::Connect::ContactFlow
     Properties:
-      InstanceArn: !GetAtt ConnectInstance.Arn
+      InstanceArn: !Ref ConnectInstanceArn
       Name: VoiceToChatFlow
       Type: CONTACT_FLOW
       Content: >
@@ -385,7 +378,7 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - DomainName: !GetAtt S3Bucket.DomainName
+          - DomainName: !GetAtt S3Bucket.RegionalDomainName
             Id: S3Origin
             S3OriginConfig: {}
         Enabled: true
@@ -397,9 +390,6 @@ Resources:
         DefaultRootObject: index.html
 
 Outputs:
-  ConnectInstanceId:
-    Description: "Connect instance ID"
-    Value: !Ref ConnectInstance
   ConnectContactFlowId:
     Description: "Connect contact flow ID"
     Value: !Ref ConnectContactFlow

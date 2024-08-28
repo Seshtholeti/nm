@@ -1,3 +1,13 @@
+-
+Validation failed for following resources: [ConnectInstance]. Rollback requested by user.
+2024-08-28 13:25:17 UTC+0530
+ConnectInstance
+CREATE_FAILED
+VALIDATION_FAILED
+Properties validation failed for resource ConnectInstance with message: [#/Attributes: extraneous key [InboundCallsEnabled] is not permitted, #/Attributes: extraneous key [ContactFlowLogsEnabled] is not permitted, #/Attributes: extraneous key [ChatEnabled] is not permitted, #/Attributes: extraneous key [OutboundCallsEnabled] is not permitted]
+
+
+
 ```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution

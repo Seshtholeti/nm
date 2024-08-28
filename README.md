@@ -1,55 +1,30 @@
-
-	
-ROLLBACK_COMPLETE
--
--
-2024-08-28 13:53:43 UTC+0530
-voice-to-chat-model
-ROLLBACK_IN_PROGRESS
--
-Validation failed for following resources: [ConnectInstance]. Rollback requested by user.
-2024-08-28 13:53:43 UTC+0530
-ConnectInstance
-CREATE_FAILED
-VALIDATION_FAILED
-Properties validation failed for resource ConnectInstance with message: [#/Attributes: extraneous key [ContactFlowLogs] is not permitted, #/Attributes/InboundCalls: expected type: Boolean, found: String, #/Attributes/OutboundCalls: expected type: Boolean, found: String, #/Attributes/ContactLens: expected type: Boolean, found: String, #/Attributes/AutoResolveBestVoices: expected type: Boolean, found: String]
-2024-08-28 13:53:40 UTC+0530
-voice-to-chat-model
-CREATE_IN_PROGRESS
--
-User Initiated
-
-
-```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
-
 Parameters:
-  LambdaExecutionRole:
-    Type: String
-    Description: ARN of the IAM role for Lambda execution
-  EmailIdentityArn:
-    Type: String
-    Description: ARN of the SES email identity for Pinpoint email channel
-
+ LambdaExecutionRole:
+   Type: String
+   Description: ARN of the IAM role for Lambda execution
+ EmailIdentityArn:
+   Type: String
+   Description: ARN of the SES email identity for Pinpoint email channel
 Resources:
-  ConnectInstance:
-    Type: AWS::Connect::Instance
-    Properties:
-      IdentityManagementType: CONNECT_MANAGED
-      InstanceAlias: VoiceToChatInstance
-      Attributes:
-        AutoResolveBestVoices: ENABLED
-        ContactFlowLogs: ENABLED
-        ContactLens: ENABLED
-        InboundCalls: ENABLED
-        OutboundCalls: ENABLED
+ ConnectInstance:
+   Type: AWS::Connect::Instance
+   Properties:
+     IdentityManagementType: CONNECT_MANAGED
+     InstanceAlias: VoiceToChatInstance
+     Attributes:
+       AutoResolveBestVoices: true  # Changed from ENABLED to true
+       InboundCalls: true             # Changed from ENABLED to true
+       OutboundCalls: true            # Changed from ENABLED to true
+       ContactLens: true              # Changed from ENABLED to true
 
   ConnectContactFlow:
     Type: AWS::Connect::ContactFlow
     Properties:
       InstanceArn: !GetAtt ConnectInstance.Arn
       Name: VoiceToChatFlow
+      Type: CONTACT_FLOW
       Content: >
         {
           "Version": "2019-10-30",
@@ -438,5 +413,3 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront distribution ID"
     Value: !Ref CloudFrontDistribution
-
-```

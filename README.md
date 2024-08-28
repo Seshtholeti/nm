@@ -1,23 +1,25 @@
+```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
 Parameters:
- LambdaExecutionRole:
-   Type: String
-   Description: ARN of the IAM role for Lambda execution
- EmailIdentityArn:
-   Type: String
-   Description: ARN of the SES email identity for Pinpoint email channel
+  LambdaExecutionRole:
+    Type: String
+    Description: ARN of the IAM role for Lambda execution
+  EmailIdentityArn:
+    Type: String
+    Description: ARN of the SES email identity for Pinpoint email channel
+
 Resources:
- ConnectInstance:
-   Type: AWS::Connect::Instance
-   Properties:
-     IdentityManagementType: CONNECT_MANAGED
-     InstanceAlias: VoiceToChatInstance
-     Attributes:
-       AutoResolveBestVoices: true  # Changed from ENABLED to true
-       InboundCalls: true             # Changed from ENABLED to true
-       OutboundCalls: true            # Changed from ENABLED to true
-       ContactLens: true              # Changed from ENABLED to true
+  ConnectInstance:
+    Type: AWS::Connect::Instance
+    Properties:
+      IdentityManagementType: CONNECT_MANAGED
+      InstanceAlias: VoiceToChatInstance
+      Attributes:
+        AutoResolveBestVoices: true
+        InboundCalls: true
+        OutboundCalls: true
+        ContactLens: true
 
   ConnectContactFlow:
     Type: AWS::Connect::ContactFlow
@@ -413,3 +415,5 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront distribution ID"
     Value: !Ref CloudFrontDistribution
+
+```

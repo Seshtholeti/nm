@@ -1,14 +1,44 @@
+DELETE_COMPLETE
 -
-Validation failed for following resources: [ConnectInstance]. Rollback requested by user.
-2024-08-28 13:25:17 UTC+0530
+-
+2024-08-28 13:40:08 UTC+0530
+LambdaFunction
+DELETE_COMPLETE
+-
+-
+2024-08-28 13:40:08 UTC+0530
+S3Bucket
+DELETE_COMPLETE
+-
+-
+2024-08-28 13:40:06 UTC+0530
+voice-to-chat-model
+ROLLBACK_IN_PROGRESS
+-
+The following resource(s) failed to create: [PinpointApp, LambdaFunction, S3Bucket, ConnectInstance]. Rollback requested by user.
+2024-08-28 13:40:05 UTC+0530
+PinpointApp
+CREATE_FAILED
+-
+Resource creation cancelled
+2024-08-28 13:40:05 UTC+0530
+S3Bucket
+CREATE_FAILED
+-
+Resource creation cancelled
+2024-08-28 13:40:05 UTC+0530
+LambdaFunction
+CREATE_FAILED
+-
+Resource creation cancelled
+2024-08-28 13:40:05 UTC+0530
 ConnectInstance
 CREATE_FAILED
-VALIDATION_FAILED
-Properties validation failed for resource ConnectInstance with message: [#/Attributes: extraneous key [InboundCallsEnabled] is not permitted, #/Attributes: extraneous key [ContactFlowLogsEnabled] is not permitted, #/Attributes: extraneous key [ChatEnabled] is not permitted, #/Attributes: extraneous key [OutboundCallsEnabled] is not permitted]
+-
+Properties validation failed for resource ConnectInstance with message: #: required key [Attributes] not found
 
 
 
-```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
 
@@ -26,17 +56,13 @@ Resources:
     Properties:
       IdentityManagementType: CONNECT_MANAGED
       InstanceAlias: VoiceToChatInstance
-      Attributes:  # Added required Attributes property
-        InboundCallsEnabled: true
-        OutboundCallsEnabled: true
-        ContactFlowLogsEnabled: true
-        ChatEnabled: true
 
   ConnectContactFlow:
     Type: AWS::Connect::ContactFlow
     Properties:
       InstanceArn: !GetAtt ConnectInstance.Arn
       Name: VoiceToChatFlow
+      Type: CONTACT_FLOW
       Content: >
         {
           "Version": "2019-10-30",
@@ -425,5 +451,3 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront distribution ID"
     Value: !Ref CloudFrontDistribution
-
-```

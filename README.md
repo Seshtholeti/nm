@@ -1,44 +1,3 @@
-DELETE_COMPLETE
--
--
-2024-08-28 13:40:08 UTC+0530
-LambdaFunction
-DELETE_COMPLETE
--
--
-2024-08-28 13:40:08 UTC+0530
-S3Bucket
-DELETE_COMPLETE
--
--
-2024-08-28 13:40:06 UTC+0530
-voice-to-chat-model
-ROLLBACK_IN_PROGRESS
--
-The following resource(s) failed to create: [PinpointApp, LambdaFunction, S3Bucket, ConnectInstance]. Rollback requested by user.
-2024-08-28 13:40:05 UTC+0530
-PinpointApp
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 13:40:05 UTC+0530
-S3Bucket
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 13:40:05 UTC+0530
-LambdaFunction
-CREATE_FAILED
--
-Resource creation cancelled
-2024-08-28 13:40:05 UTC+0530
-ConnectInstance
-CREATE_FAILED
--
-Properties validation failed for resource ConnectInstance with message: #: required key [Attributes] not found
-
-
-
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
 
@@ -51,11 +10,17 @@ Parameters:
     Description: ARN of the SES email identity for Pinpoint email channel
 
 Resources:
-  ConnectInstance:
+   ConnectInstance:
     Type: AWS::Connect::Instance
     Properties:
       IdentityManagementType: CONNECT_MANAGED
       InstanceAlias: VoiceToChatInstance
+      Attributes:
+        AutoResolveBestVoices: ENABLED
+        ContactFlowLogs: ENABLED
+        ContactLens: ENABLED
+        InboundCalls: ENABLED
+        OutboundCalls: ENABLED
 
   ConnectContactFlow:
     Type: AWS::Connect::ContactFlow

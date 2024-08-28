@@ -1,3 +1,4 @@
+```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
 
@@ -10,7 +11,7 @@ Parameters:
     Description: ARN of the SES email identity for Pinpoint email channel
 
 Resources:
-   ConnectInstance:
+  ConnectInstance:
     Type: AWS::Connect::Instance
     Properties:
       IdentityManagementType: CONNECT_MANAGED
@@ -27,7 +28,6 @@ Resources:
     Properties:
       InstanceArn: !GetAtt ConnectInstance.Arn
       Name: VoiceToChatFlow
-      Type: CONTACT_FLOW
       Content: >
         {
           "Version": "2019-10-30",
@@ -416,3 +416,5 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront distribution ID"
     Value: !Ref CloudFrontDistribution
+
+```

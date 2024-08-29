@@ -1,3 +1,4 @@
+```yaml
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for Voice-To-Chat Solution
 
@@ -93,3 +94,5 @@ Outputs:
   CloudFrontDistributionId:
     Description: "CloudFront distribution ID"
     Value: !Ref CloudFrontDistribution
+
+```

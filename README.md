@@ -1,4 +1,4 @@
-import { ConnectClient, GetCurrentMetricDataCommand, ListQueuesCommand, ListUsersCommand } from "@aws-sdk/client-connect";
+import { ConnectClient, ListUsersCommand, GetCurrentMetricDataCommand } from "@aws-sdk/client-connect";
 // Initialize the Connect client
 const client = new ConnectClient({ region: 'us-east-1' });
 // Helper function to get an array of dates between two dates
@@ -11,59 +11,105 @@ function getDateRange(startDate, endDate) {
  }
  return dates;
 }
-// Helper function to fetch all queues dynamically
-async function getQueues(instanceId) {
- const input = { InstanceId: instanceId };
- try {
-   const command = new ListQueuesCommand(input);
-   const data = await client.send(command);
-   const queueIds = data.QueueSummaryList.map((queue) => queue.Id);
-   return queueIds;
- } catch (err) {
-   console.error("Error fetching queues:", err);
-   throw err;
- }
-}
-// Helper function to fetch all agents dynamically
-async function getAgents(instanceId) {
- const input = { InstanceId: instanceId };
- try {
-   const command = new ListUsersCommand(input);
-   const data = await client.send(command);
-   const agentIds = data.UserSummaryList.map((user) => user.Id);
-   return agentIds;
- } catch (err) {
-   console.error("Error fetching agents:", err);
-   throw err;
- }
-}
+// Main handler function
 export const handler = async (event) => {
  const { resourceType, selectedResources, startDate, endDate } = event;
  // Validate that selectedResources is not empty
  if (!selectedResources || selectedResources.length === 0) {
-   throw new Error("You must select at least one resource.");
+   return { error: "You must select at least one resource." };
  }
- const instanceId = process.env.InstanceId;
- const dateRange = getDateRange(startDate, endDate);
+ const instanceId = process.env.InstanceId; // Your Amazon Connect instance ID
+ // Prepare response structure
  const response = {
    resourceType,
    startDate,
    endDate,
    selectedResources,
-   metricsByDate: [],
+   metricsByDate: []
  };
- // Fetch metrics for both Queues and Agents if specified
- for (const date of dateRange) {
-   const dateMetrics = { date, queueMetrics: [], agentMetrics: [] };
-   // Fetching Queue Metrics
-   if (resourceType === "Queues") {
-     const queueInput = {
+ // Handle metrics for Agents
+ if (resourceType === "Agents") {
+   try {
+     // Step 1: List all agents
+     const listUsersCommand = new ListUsersCommand({ InstanceId: instanceId });
+     const usersResponse = await client.send(listUsersCommand);
+     const agents = usersResponse.UserSummaryList;
+     // Filter agents based on selectedResources if needed
+     const filteredAgents = agents.filter(agent => selectedResources.includes(agent.UserId));
+     console.log(filteredAgents)
+     const dateRange = getDateRange(startDate, endDate);
+     // Loop through each date in the range for Agents
+     for (const date of dateRange) {
+      const queue1 = selectedResources
+       const input = {
+        
+         InstanceId: instanceId,
+         Filters: {
+           Agents: filteredAgents.map(agent => agent.Arn),
+           Queues:queue1,// Use the ARNs of filtered agents
+           Channels: ["VOICE"], // Specify channels as needed
+         },
+         Groupings: ["QUEUE","AGENTS"], 
+         CurrentMetrics: [
+           { Name: "AGENTS_ONLINE", Unit: "COUNT" },
+           { Name: "AGENTS_AVAILABLE", Unit: "COUNT" },
+           { Name: "CONTACTS_HANDLED", Unit: "COUNT" },
+         ],
+         StartTime: new Date(`${date}T00:00:00Z`).toISOString(),
+         EndTime: new Date(`${date}T23:59:59Z`).toISOString(),
+       };
+       try {
+         const command = new GetCurrentMetricDataCommand(input);
+         const data = await client.send(command);
+         // Process the metrics for each agent on the current date
+         const dailyMetrics = {
+           date,
+           type: 'Agent',
+           metrics: [],
+         };
+         if (data.MetricResults && data.MetricResults.length > 0) {
+           data.MetricResults.forEach((result) => {
+             const agentMetrics = result.Collections.map((collection) => ({
+               metricName: collection.Metric.Name,
+               metricValue: collection.Value,
+             }));
+             dailyMetrics.metrics.push({
+               routingProfileId: result.Dimensions.RoutingProfile.Id || "Unknown Profile",
+               queueId: result.Dimensions.Queue.Id || "Unknown Queue",
+               metrics: agentMetrics,
+             });
+           });
+         }
+         // Append the daily metrics to the response
+         response.metricsByDate.push(dailyMetrics);
+       } catch (err) {
+         console.error(`Error fetching metrics for date ${date}:`, err);
+         response.metricsByDate.push({
+           date,
+           errorMessage: err.message,
+         });
+       }
+     }
+   } catch (error) {
+     console.error("Error listing users:", error);
+     return {
+       statusCode: 500,
+       body: JSON.stringify({ error: error.message }),
+     };
+   }
+ // Handle metrics for Queues
+ } else if (resourceType === "Queues") {
+   const queueIds = selectedResources; // Assuming selectedResources contains queue IDs
+   const dateRange = getDateRange(startDate, endDate);
+   // Loop through each date in the range for Queues
+   for (const date of dateRange) {
+     const input = {
        InstanceId: instanceId,
        Filters: {
-         Queues: selectedResources,
-         Channels: ["VOICE"],
+         Queues: queueIds,
+         Channels: ["VOICE"], 
        },
-       Groupings: ["QUEUE"],
+       Groupings: ["QUEUE"], 
        CurrentMetrics: [
          { Name: "AGENTS_ONLINE", Unit: "COUNT" },
          { Name: "AGENTS_AVAILABLE", Unit: "COUNT" },
@@ -76,138 +122,39 @@ export const handler = async (event) => {
        EndTime: new Date(`${date}T23:59:59Z`).toISOString(),
      };
      try {
-       const queueCommand = new GetCurrentMetricDataCommand(queueInput);
-       const queueData = await client.send(queueCommand);
-       if (queueData.MetricResults && queueData.MetricResults.length > 0) {
-         queueData.MetricResults.forEach((result) => {
-           const metrics = result.Collections.map((collection) => ({
+       const command = new GetCurrentMetricDataCommand(input);
+       const data = await client.send(command);
+       // Process the metrics for each queue on the current date
+       const dailyMetrics = {
+         date,
+         type: 'Queue',
+         metrics: [],
+       };
+       if (data.MetricResults && data.MetricResults.length > 0) {
+         data.MetricResults.forEach((result) => {
+           const queueMetrics = result.Collections.map((collection) => ({
              metricName: collection.Metric.Name,
              metricValue: collection.Value,
            }));
-           dateMetrics.queueMetrics.push({
+           dailyMetrics.metrics.push({
              queueId: result.Dimensions.Queue.Id,
              queueName: result.Dimensions.Queue.Name || "Unknown Queue",
-             metrics,
+             metrics: queueMetrics,
            });
          });
        }
+       // Append the daily metrics to the response
+       response.metricsByDate.push(dailyMetrics);
      } catch (err) {
-       console.error(`Error fetching queue metrics for date ${date}:`, err);
-       dateMetrics.queueMetrics.push({
-         error: err.message,
+       console.error(`Error fetching metrics for date ${date}:`, err);
+       response.metricsByDate.push({
+         date,
+         errorMessage : err.message,
        });
      }
    }
-   // Fetching Agent Metrics
-   if (resourceType === "Agents") {
-     const agentInput = {
-       InstanceId: instanceId,
-       Filters: {
-         RoutingProfileIds: selectedResources,
-         Channels: ["VOICE"],
-       },
-       Groupings: ["AGENT","QUEUE"],
-       CurrentMetrics: [
-         { Name: "AGENTS_AFTER_CONTACT_WORK", Unit: "COUNT" },
-         { Name: "AGENTS_AVAILABLE", Unit: "COUNT" },
-         { Name: "AGENTS_ON_CALL", Unit: "COUNT" },
-         { Name: "AGENTS_STAFFED", Unit: "COUNT" },
-         { Name: "CONTACTS_HANDLED", Unit: "COUNT" },
-         { Name: "OCCUPANCY", Unit: "PERCENT" },
-       ],
-       StartTime: new Date(`${date}T00:00:00Z`).toISOString(),
-       EndTime: new Date(`${date}T23:59:59Z`).toISOString(),
-     };
-     try {
-       const agentCommand = new GetCurrentMetricDataCommand(agentInput);
-       const agentData = await client.send(agentCommand);
-       if (agentData.MetricResults && agentData.MetricResults.length > 0) {
-         agentData.MetricResults.forEach((result) => {
-           const metrics = result.Collections.map((collection) => ({
-             metricName: collection.Metric.Name,
-             metricValue: collection.Value,
-           }));
-           dateMetrics.agentMetrics.push({
-             agentId: result.Dimensions.Agent.Id,
-             agentName: result.Dimensions.Agent.Name || "Unknown Agent",
-             metrics,
-           });
-         });
-       }
-     } catch (err) {
-       console.error(`Error fetching agent metrics for date ${date}:`, err);
-       dateMetrics.agentMetrics.push({
-         error: err.message,
-       });
-     }
-   }
-   response.metricsByDate.push(dateMetrics);
+ } else {
+   return { error : "Unsupported resource type" };
  }
  return response;
-};
-
-this is the error in console
-{
-  "resourceType": "Agents",
-  "startDate": "2024-11-6",
-  "endDate": "2024-11-11",
-  "selectedResources": [
-    "f8c742b9-b5ef-4948-8bbf-9a33c892023f"
-  ],
-  "metricsByDate": [
-    {
-      "date": "2024-11-06",
-      "queueMetrics": [],
-      "agentMetrics": [
-        {
-          "error": "Invalid request body"
-        }
-      ]
-    },
-    {
-      "date": "2024-11-07",
-      "queueMetrics": [],
-      "agentMetrics": [
-        {
-          "error": "Invalid request body"
-        }
-      ]
-    },
-    {
-      "date": "2024-11-08",
-      "queueMetrics": [],
-      "agentMetrics": [
-        {
-          "error": "Invalid request body"
-        }
-      ]
-    },
-    {
-      "date": "2024-11-09",
-      "queueMetrics": [],
-      "agentMetrics": [
-        {
-          "error": "Invalid request body"
-        }
-      ]
-    },
-    {
-      "date": "2024-11-10",
-      "queueMetrics": [],
-      "agentMetrics": [
-        {
-          "error": "Invalid request body"
-        }
-      ]
-    },
-    {
-      "date": "2024-11-11",
-      "queueMetrics": [],
-      "agentMetrics": [
-        {
-          "error": "Invalid request body"
-        }
-      ]
-    }
-  ]
 }
